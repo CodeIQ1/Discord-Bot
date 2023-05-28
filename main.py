@@ -40,7 +40,7 @@ async def on_message(message):
 
     # Example command: !hello
     if message.content.startswith('c!hello'):
-        await message.channel.send("Hello!, I am a Discord bot developed and owned by **CodeIQ**")
+        await message.channel.send("Hello!, I am a Discord bot developed and owned by **CodeIQ on GitHub**")
 
     if message.content.startswith('c!code-idea'):
         project_ideas = ['Build a chatbot',
