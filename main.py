@@ -41,6 +41,22 @@ async def on_message(message):
     # Example command: !hello
     if message.content.startswith('c!hello'):
         await message.channel.send("Hello!, I am a Discord bot developed and owned by **CodeIQ on GitHub**")
+     
+     # decimal to binary converter
+    if message.content.startswith('c!dtob'):
+        input_str = message.content.split(' ')[1] # get the input string after the command
+        decimal_number = int(input_str) # convert the input string to an integer
+        binary_number = bin(decimal_number)[2:] # convert the decimal number to binary
+
+        await message.channel.send(f"The binary representation of {decimal_number} is {binary_number}")
+        
+     # binary to decimal converter
+    if message.content.startswith('c!btod'):
+        input_str = message.content.split(' ')[1] # get the input string after the command
+        decimal_number = int(input_str, 2) # convert the binary string to decimal
+
+        await message.channel.send(f"The decimal representation of {input_str} is {decimal_number}")
+
 
     if message.content.startswith('c!code-idea'):
         project_ideas = ['Build a chatbot',
