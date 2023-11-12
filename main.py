@@ -1,80 +1,46 @@
-import discord
-from discord.ext import commands
 import requests
 import random
-
 import itertools
-import threading
-import time
+import asyncio
 import sys
-done = False
-#here is the animation
-def animate():
-    for c in itertools.cycle(['|', '/', '-', '\\']):
-        if done:
-            break
-        sys.stdout.write('\rloading ' + c)
-        sys.stdout.flush()
-        time.sleep(0.1)
-    sys.stdout.write('\rDone!')
-t = threading.Thread(target=animate)
-t.start()
-#long process here
-time.sleep(10)
-done = True
+from interactions import Client, Intents, listen, slash_command, SlashContext
+from interactions.api.events import Component, Error
+from interactions.ext import prefixed_commands
 
-intents = discord.Intents.default()
-intents.message_content = True
 
-client = commands.Bot(command_prefix='c!', intents=intents)
-users = {}
 
-@client.event
+bot = Client(
+    intents=Intents.DEFAULT | Intents.MESSAGE_CONTENT,
+    sync_interactions=True,
+    asyncio_debug=True,
+)
+
+@bot.event
 async def on_ready():
-    print(f'\nLogged in as {client.user.name}')
+    print(f'\nLogged in as {bot.user}')
+    global done
+    done = False
+    await animate()
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
+    
+from interactions.api.events import Error
 
-    # Example command: !hello
-    if message.content.startswith('c!hello'):
-        await message.channel.send("Hello!, I am a Discord bot developed and owned by **CodeIQ on GitHub**")
-     
-     # decimal to binary converter
-    if message.content.startswith('c!dtob'):
-        input_str = message.content.split(' ')[1] # get the input string after the command
-        decimal_number = int(input_str) # convert the input string to an integer
-        binary_number = bin(decimal_number)[2:] # convert the decimal number to binary
+@listen()
+async def on_error(error: Error):
+    await bot.get_channel(1110662656475537429).send(f"```\n{error.source}\n{error.error}\n```")
+    
+@slash_command(name="hello", description="Say hello!")
+async def hello(ctx: SlashContext):
+    await ctx.send("Hello!, I am a Discord bot developed and owned by **CodeIQ on GitHub**")
+    
+@slash_command(name="help", description="Get help!")
+async def help(ctx: SlashContext):
+    embeds = [Embed("The best place to learn python coding with our outstanding educational service dedicated to providing a coding education to individuals seeking to master programming. Our easy to follow courses and guides empower learners of all backgrounds with the skills and confidence needed to thrive in the digital world. Discover the power of coding with PyIQ and unlock endless opportunities for growth and success in the ever-evolving tech industry. Let's embark on this transformative learning journey together!"), Embed("The best place to learn python coding with our outstanding educational service dedicated to providing a coding education to individuals seeking to master programming. Our easy to follow courses and guides empower learners of all backgrounds with the skills and confidence needed to thrive in the digital world. Discover the power of coding with PyIQ and unlock endless opportunities for growth and success in the ever-evolving tech industry. Let's embark on this transformative learning journey together!"), Embed("The best place to learn python coding with our outstanding educational service dedicated to providing a coding education to individuals seeking to master programming. Our easy to follow courses and guides empower learners of all backgrounds with the skills and confidence needed to thrive in the digital world. Discover the power of coding with PyIQ and unlock endless opportunities for growth and success in the ever-evolving tech industry. Let's embark on this transformative learning journey together!")]
+    paginator = Paginator.create_from_embeds(bot, *embeds)
+@slash_command(name="project_idea", description="Get a project idea!")
+async def project(ctx: SlashContext):
+    project_ideas = ['Build a chatbot', 'Create a weather application', 'Develop a task management tool', 'Build a cryptocurrency tracker', 'Create a recipe recommendation system', 'Develop a music streaming service', 'Build a personal finance manager', 'Create a language learning application', 'Develop a quiz game', 'Build a social media dashboard', 'Make a website', 'Make a Discord bot']
+    project_idea = random.choice(project_ideas)
+    await ctx.send(f'__Code Project Idea:__ **{project_idea}**')
 
-        await message.channel.send(f"The binary representation of {decimal_number} is {binary_number}")
-        
-     # binary to decimal converter
-    if message.content.startswith('c!btod'):
-        input_str = message.content.split(' ')[1] # get the input string after the command
-        decimal_number = int(input_str, 2) # convert the binary string to decimal
-
-        await message.channel.send(f"The decimal representation of {input_str} is {decimal_number}")
-
-
-    if message.content.startswith('c!code-idea'):
-        project_ideas = ['Build a chatbot',
-                         'Create a weather application',
-                         'Develop a task management tool',
-                         'Build a cryptocurrency tracker',
-                         'Create a recipe recommendation system',
-                         'Develop a music streaming service',
-                         'Build a personal finance manager',
-                         'Create a language learning application',
-                         'Develop a quiz game',
-                         'Build a social media dashboard',
-                         'Make a website',
-                         'Maker a DiscoRD bOT']
-        project_idea = random.choice(project_ideas)
-        await message.channel.send(f'__Code Project Idea:__ **{project_idea}**')
-
-
-
-
-client.run('ENTER_TOKEN')
+bot.start('token')
